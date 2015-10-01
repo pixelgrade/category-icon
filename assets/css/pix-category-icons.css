@@ -3,12 +3,38 @@ th#pix-category-icon {
 }
 
 .open_term_icon_preview {
-	padding-top: 30px;
-	margin: 20px;
-	width: 120px;
-	height: 60px;
-	background: #ccc;
+	width: 150px;
+	height: 150px;
+	background: #ddd;
 	display: block;
-	border: 2px solid #333;
 	text-align: center;
+	position: relative;
+}
+
+.open_term_icon_preview img {
+	position: absolute;
+	top:0; bottom: 0;
+	left: 0; right: 0;
+	z-index: 5;
+}
+
+.open_term_icon_preview span.open_term_icon_delete {
+	display: none;
+	margin: 0 30px 0;
+	position: relative;
+	z-index: 10;
+}
+
+.open_term_icon_preview span.open_term_icon_upload {
+	display: none;
+	margin: 45px 30px 5px;
+	position: relative;
+	z-index: 10;
+}
+
+.open_term_icon_preview:hover .open_term_icon_upload{
+	display: inline-block;
+}
+.open_term_icon_preview:hover  .open_term_icon_delete {
+	display: inline-block;
 }

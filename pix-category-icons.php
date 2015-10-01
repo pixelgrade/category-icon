@@ -19,6 +19,7 @@ $pixcategoryicons_plugin = PixCategoryIconsPlugin::get_instance();
 class PixCategoryIconsPlugin {
 
 	protected static $instance;
+	protected $default_settings;
 	protected $plugin_basepath = null;
 	protected $plugin_baseurl = null;
 	protected $plugin_screen_hook_suffix = null;
@@ -31,6 +32,13 @@ class PixCategoryIconsPlugin {
 	 * @since     1.0.0
 	 */
 	protected function __construct() {
+
+		$this->default_settings = array(
+			'taxonomies' => array(
+				'category' => 'on',
+			)
+		);
+
 		$this->plugin_basepath = plugin_dir_path( __FILE__ );
 		$this->plugin_baseurl = plugin_dir_url( __FILE__ );
 
@@ -149,7 +157,10 @@ class PixCategoryIconsPlugin {
 				<div class="open_term_icon_preview">
 					<?php echo wp_get_attachment_image( $current_value ); ?>
 					<span class="open_term_icon_upload button button-secondary">
-						<?php _e( 'Select Icon', 'pix-category-icons');?>
+						<?php _e( 'Select', 'pix-category-icons');?>
+					</span>
+					<span class="open_term_icon_delete button button-secondary">
+						<?php _e( 'Remove', 'pix-category-icons');?>
 					</span>
 				</div>
 			<?php } ?>
@@ -159,7 +170,7 @@ class PixCategoryIconsPlugin {
 	}
 
 	function save_taxonomy_custom_meta ( $term_id ) {
-		if ( isset( $_POST['term_icon_value'] ) && ! empty( $_POST['term_icon_value'] ) ) {
+		if ( isset( $_POST['term_icon_value'] ) ) {
 			$value = $_POST['term_icon_value'];
 			$current_value = get_term_meta( $term_id, 'pix_term_icon', true );
 
@@ -199,9 +210,7 @@ class PixCategoryIconsPlugin {
 		}
 	}
 
-
 	/** Ensure compat with wp 4.4 */
-
 	function create_the_termmeta_table( $id = false ) {
 		global $wpdb;
 
@@ -242,7 +251,6 @@ class PixCategoryIconsPlugin {
 		}
 	}
 
-
 	/**
 	 * create an admin page
 	 */
@@ -257,8 +265,6 @@ class PixCategoryIconsPlugin {
 	}
 
 	function plugin_admin_init() {
-
-
 		register_setting( 'pix_category_icons', 'pix_category_icons', array( $this, 'save_setting_values' ) );
 		add_settings_section(
 			'pix_category_icons',
@@ -274,6 +280,10 @@ class PixCategoryIconsPlugin {
 
 		// get the current selected taxonomies
 		$options = get_option('pix_category_icons');
+
+		if ( empty( $options ) ) {
+			$options = $this->get_defaults();
+		}
 
 		$selected_taxonomies = array();
 
@@ -325,6 +335,10 @@ class PixCategoryIconsPlugin {
 		}
 
 		return null;
+	}
+
+	function get_defaults() {
+		return $this->default_settings;
 	}
 }
 
@@ -396,7 +410,6 @@ if ( ! function_exists( 'get_term_meta' ) ) {
 		return get_metadata( 'term', $term_id, $key, $single );
 	}
 }
-
 
 if ( ! function_exists( 'update_term_meta' ) ) {
 	/**

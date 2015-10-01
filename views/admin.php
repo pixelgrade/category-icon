@@ -8,8 +8,7 @@
  */ ?>
 
 <div class="wrap" id="category_icons_form">
-
-	<div id="icon-options-general" class="icon32">aa<br></div>
+	<div id="icon-options-general" class="icon32"></div>
 	<form action="options.php" method="post">
 		<?php
 		settings_fields('pix_category_icons');

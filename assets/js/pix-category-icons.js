@@ -6,6 +6,18 @@
 			wp.media.EditTermIconUpload.frame().open();
 		});
 
+		$(document).on('click', '.open_term_icon_delete', function (e) {
+			e.preventDefault();
+			$('#term_icon_value' ).val('');
+
+			console.log( this );
+			console.log( $(this).siblings('img') );
+
+			$(this).siblings('img').remove();
+
+			$(this).remove();
+		});
+
 		// Link any localized strings.
 		var l10n = wp.media.view.l10n = typeof _wpMediaViewsL10n === 'undefined' ? {} : _wpMediaViewsL10n;
 
@@ -55,17 +67,29 @@
 					//selection = selection || state.get('selection');
 					var controller = wp.media.EditTermIconUpload._frame.states.get('insert'),
 						library = controller.get('library' ),
-					// Need to get all the attachment ids for gallery
-					ids = library.pluck('id' );
+						current_selection = controller.get('selection' ),
+						selected_models = current_selection.models;
 
-					var current_selection = controller.get('selection' );
+					if ( typeof selected_models[0] !== "undefined" ) {
+						// set value
+						var new_id = selected_models[0].id,
+							$input = $('#term_icon_value' ),
+							this_container = $input.parent();
 
-					console.log( current_selection );
-
-					var plm = current_selection.models;
-
-					if ( typeof plm[0] !== "undefined" ) {
-						$('#term_icon_value').val( plm[0].id );
+						$input.val( new_id );
+						// preview the new value
+						if ( typeof selected_models[0].attributes !== undefined && typeof selected_models[0].attributes.sizes !== 'undefined' && typeof selected_models[0].attributes.sizes.thumbnail !== 'undefined' && typeof selected_models[0].attributes.sizes.thumbnail.url !== "undefined" ) {
+							var thumb_url = selected_models[0].attributes.sizes.thumbnail.url;
+							var $current_img = $(this_container).find('.open_term_icon_preview img');
+							if ( $current_img.length > 0 ) {
+								$current_img.attr('src', thumb_url);
+							} else {
+								var new_img = $('<img>');
+								new_img.attr('src', thumb_url);
+								$(this_container).find('.open_term_icon_preview' ).append( new_img );
+								$(this_container).find('.open_term_icon_preview' ).append( '<span class="open_term_icon_delete button button-secondary">Delete</span>' );
+							}
+						}
 					}
 				});
 
@@ -97,7 +121,7 @@
 				attachments = wp.media.gallery.attachments(shortcode);
 				selection = new wp.media.model.Selection(attachments.models, {
 					props: attachments.props.toJSON(),
-					multiple: true
+					multiple: false
 				});
 
 				selection.gallery = attachments.gallery;
