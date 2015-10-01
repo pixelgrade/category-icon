@@ -3,7 +3,7 @@
 Plugin Name: Pix Category Icons
 Plugin URI:  http://pixelgrade.com
 Description: WordPress photo gallery proofing plugin.
-Version: 1.2.1
+Version: 0.0.1
 Author: PixelGrade
 Author URI: http://pixelgrade.com
 Author Email: contact@pixelgrade.com
@@ -13,8 +13,8 @@ License URI: http://www.gnu.org/licenses/gpl-2.0.txt
 Domain Path: /lang
 */
 
-global $pixproof_plugin;
-$pixproof_plugin = PixCategoryIconsPlugin::get_instance();
+global $pixcategoryicons_plugin;
+$pixcategoryicons_plugin = PixCategoryIconsPlugin::get_instance();
 
 class PixCategoryIconsPlugin {
 
@@ -99,13 +99,18 @@ class PixCategoryIconsPlugin {
 				add_action( $tax_name . '_edit_form_fields', array( $this, 'taxonomy_edit_new_meta_field'), 10, 2 );
 				add_action( 'edited_' . $tax_name,  array( $this, 'save_taxonomy_custom_meta' ), 10, 2 );
 				add_action( 'create_' . $tax_name,  array( $this, 'save_taxonomy_custom_meta' ), 10, 2 );
+
+				add_filter( "manage_edit-" . $tax_name . "_columns", array( $this, 'add_custom_tax_column' ) );
+				//add_filter( "manage_edit-' . $tax_name . '_sortable_columns", 'make_sortable_col' );
+				add_filter( "manage_" . $tax_name . "_custom_column", array( $this, 'output_custom_tax_column' ), 10, 3 );
 			}
 		}
 	}
 
 	function enqueue_admin_scripts () {
+		wp_enqueue_style( $this->plugin_slug . '-admin-style', plugins_url( 'assets/css/pix-category-icons.css', __FILE__ ), array(  ), $this->version );
 		wp_enqueue_media();
-		wp_enqueue_script( $this->plugin_slug . '-admin-script', plugins_url( 'pix-category-icons.js', __FILE__ ), array( 'jquery' ), $this->version );
+		wp_enqueue_script( $this->plugin_slug . '-admin-script', plugins_url( 'assets/js/pix-category-icons.js', __FILE__ ), array( 'jquery' ), $this->version );
 		wp_localize_script( $this->plugin_slug . '-admin-script', 'locals', array(
 			'ajax_url' => admin_url( 'admin-ajax.php' )
 		) );
@@ -115,46 +120,32 @@ class PixCategoryIconsPlugin {
 		<tr class="form-field">
 			<td>
 				<input type="hidden" name="term_icon_value" id="term_icon_value" value="">
-				<div class="open_term_icon_preview" style="    padding-top: 30px;
-    margin: 20px;
-    width: 120px;
-    height: 60px;
-    background: #ccc;
-    display: block;
-    border: 2px solid #333;
-    text-align: center;">
-				<span class="open_term_icon_upload button button-secondary">
-					<?php _e( 'Select Icon', 'pix-category-icons');?>
-				</span>
+				<div class="open_term_icon_preview">
+					<span class="open_term_icon_upload button button-secondary" >
+						<?php _e( 'Select Icon', 'pix-category-icons'); ?>
+					</span>
 				</div>
 			</td>
 		</tr>
 		<?php
 	}
 
-	function taxonomy_edit_new_meta_field ( $term, $test_name ) {
+	function taxonomy_edit_new_meta_field ( $term ) {
 		$current_value = '';
 		if ( isset( $term->term_id ) ) {
-			$current_value = get_term_meta( $term->term_id, 'term_meta', true );
+			$current_value = get_term_meta( $term->term_id, 'pix_term_icon', true );
 		} ?>
 		<tr class="form-field">
 			<th scope="row" valign="top"><label for="term_icon_value"><?php _e( 'icon', 'pix-category-icons' ); ?></label></th>
 			<td>
 				<input type="hidden" name="term_icon_value" id="term_icon_value" value="<?php echo $current_value; ?>">
 				<?php if ( empty( $current_value ) ) { ?>
-				<div class="open_term_icon_preview" style="    padding-top: 30px;
-					    margin: 20px;
-					    width: 120px;
-					    height: 60px;
-					    background: #ccc;
-					    display: block;
-					    border: 2px solid #333;
-					    text-align: center;">
+				<div class="open_term_icon_preview">
 					<span class="open_term_icon_upload button button-secondary">
 						<?php _e( 'Select Icon', 'pix-category-icons');?>
 					</span>
 				</div>
-			<?php } else {?>
+			<?php } else { ?>
 				<div class="open_term_icon_preview">
 					<?php echo wp_get_attachment_image( $current_value ); ?>
 					<span class="open_term_icon_upload button button-secondary">
@@ -170,21 +161,43 @@ class PixCategoryIconsPlugin {
 	function save_taxonomy_custom_meta ( $term_id ) {
 		if ( isset( $_POST['term_icon_value'] ) && ! empty( $_POST['term_icon_value'] ) ) {
 			$value = $_POST['term_icon_value'];
-			$current_value = get_term_meta( $term_id, 'term_meta', true );
+			$current_value = get_term_meta( $term_id, 'pix_term_icon', true );
 
 			if ( empty( $current_value ) ) {
-				$updated = update_term_meta( $term_id, 'term_meta', $value );
+				$updated = update_term_meta( $term_id, 'pix_term_icon', $value );
 			} else {
-				$updated = update_term_meta( $term_id, 'term_meta', $value, $current_value );
+				$updated = update_term_meta( $term_id, 'pix_term_icon', $value, $current_value );
 			}
-
 			update_termmeta_cache( array( $term_id ) );
 		}
 	}
 
+	/**
+	 * Taxonomy columns
+	 */
+	function add_custom_tax_column( $current_columns ) {
 
+		$input = array_shift( $current_columns );
+		$new_columns = array(
+			'cb' => $input,
+			'pix-category-icon' => __( 'Icon', $this->plugin_slug ),
+		);
 
+		$new_columns = $new_columns + $current_columns;
+		return $new_columns;
+	}
 
+	function output_custom_tax_column(  $value, $name, $id ) {
+		$icon_id = get_term_meta( $id, 'pix_term_icon', true );
+		if ( is_numeric( $icon_id ) )  {
+			$src = wp_get_attachment_image_src( $icon_id, 'thumbnail' );
+			if ( isset( $src[0] ) && ! empty( $src[0] ) ) {
+				echo '<div class="pix-category-icon-column_wrap media-icon">';
+					echo '<img src="' . $src[0] . '" width="60px" height="60px" />';
+				echo '</div>';
+			}
+		}
+	}
 
 
 	/** Ensure compat with wp 4.4 */
@@ -247,20 +260,14 @@ class PixCategoryIconsPlugin {
 
 
 		register_setting( 'pix_category_icons', 'pix_category_icons', array( $this, 'save_setting_values' ) );
-
-
 		add_settings_section(
 			'pix_category_icons',
 			null,
 			array( $this, 'render_settings_section_title' ),
 			'pix-category-icons'
 		);
-
-
 		add_settings_field('taxonomies', 'Select Taxonomies', array( $this, 'render_taxonomies_select' ), 'pix-category-icons', 'pix_category_icons');
-
 	}
-
 
 	function render_taxonomies_select ( ) {
 		$taxonomies = get_taxonomies();

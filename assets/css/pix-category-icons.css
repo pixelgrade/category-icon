@@ -1,0 +1,14 @@
+th#pix-category-icon {
+	width: 74px;
+}
+
+.open_term_icon_preview {
+	padding-top: 30px;
+	margin: 20px;
+	width: 120px;
+	height: 60px;
+	background: #ccc;
+	display: block;
+	border: 2px solid #333;
+	text-align: center;
+}
