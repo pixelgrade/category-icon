@@ -1,31 +1,37 @@
 <?php
 /*
-Plugin Name: Pix Category Icons
+Plugin Name: Pix Taxonomy Icons
 Plugin URI:  http://pixelgrade.com
-Description: WordPress photo gallery proofing plugin.
+Description: WordPress taxonomy proofing plugin.
 Version: 0.0.1
 Author: PixelGrade
 Author URI: http://pixelgrade.com
 Author Email: contact@pixelgrade.com
-Text Domain: proof
+Text Domain: pix-taxonomy-icons
 License:     GPL-2.0+
 License URI: http://www.gnu.org/licenses/gpl-2.0.txt
 Domain Path: /lang
 */
 
-global $pixcategoryicons_plugin;
-$pixcategoryicons_plugin = PixCategoryIconsPlugin::get_instance();
+global $pixtaxonomyicons_plugin;
+$pixtaxonomyicons_plugin = PixTaxonomyIconsPlugin::get_instance();
 
-class PixCategoryIconsPlugin {
-
+class PixTaxonomyIconsPlugin {
 	protected static $instance;
-	protected $default_settings;
+
 	protected $plugin_basepath = null;
 	protected $plugin_baseurl = null;
 	protected $plugin_screen_hook_suffix = null;
-	protected $version = '1.2.1';
-	protected $plugin_slug = 'pix-category-icons';
-	protected $plugin_key = 'pix_category_icons';
+	protected $version = '0.0.1';
+	protected $plugin_slug = 'pix-taxonomy-icons';
+	protected $plugin_key = 'pix_taxonomy_icons';
+
+	protected $default_settings = array(
+		'taxonomies' => array(
+			'category' => 'on',
+			'post_tag' => 'on'
+		)
+	);
 
 	/**
 	 * Initialize the plugin by setting localization, filters, and administration functions.
@@ -33,14 +39,15 @@ class PixCategoryIconsPlugin {
 	 */
 	protected function __construct() {
 
-		$this->default_settings = array(
-			'taxonomies' => array(
-				'category' => 'on',
-			)
-		);
-
 		$this->plugin_basepath = plugin_dir_path( __FILE__ );
 		$this->plugin_baseurl = plugin_dir_url( __FILE__ );
+
+		$options = get_option('pix_taxonomy_icons');
+		// ensure some defaults
+		if ( empty( $options ) ) {
+			$options = $this->get_defaults();
+			update_option( 'pix_taxonomy_icons', $options);
+		}
 
 		add_action( 'admin_menu', array( $this, 'add_plugin_admin_menu' ) );
 		add_action( 'admin_init', array( $this, 'plugin_admin_init' ) );
@@ -107,34 +114,28 @@ class PixCategoryIconsPlugin {
 				add_action( $tax_name . '_edit_form_fields', array( $this, 'taxonomy_edit_new_meta_field'), 10, 2 );
 				add_action( 'edited_' . $tax_name,  array( $this, 'save_taxonomy_custom_meta' ), 10, 2 );
 				add_action( 'create_' . $tax_name,  array( $this, 'save_taxonomy_custom_meta' ), 10, 2 );
-
 				add_filter( "manage_edit-" . $tax_name . "_columns", array( $this, 'add_custom_tax_column' ) );
-				//add_filter( "manage_edit-' . $tax_name . '_sortable_columns", 'make_sortable_col' );
 				add_filter( "manage_" . $tax_name . "_custom_column", array( $this, 'output_custom_tax_column' ), 10, 3 );
 			}
 		}
 	}
 
 	function enqueue_admin_scripts () {
-		wp_enqueue_style( $this->plugin_slug . '-admin-style', plugins_url( 'assets/css/pix-category-icons.css', __FILE__ ), array(  ), $this->version );
+		wp_enqueue_style( $this->plugin_slug . '-admin-style', plugins_url( 'assets/css/pix-taxonomy-icons.css', __FILE__ ), array(  ), $this->version );
 		wp_enqueue_media();
-		wp_enqueue_script( $this->plugin_slug . '-admin-script', plugins_url( 'assets/js/pix-category-icons.js', __FILE__ ), array( 'jquery' ), $this->version );
+		wp_enqueue_script( $this->plugin_slug . '-admin-script', plugins_url( 'assets/js/pix-taxonomy-icons.js', __FILE__ ), array( 'jquery' ), $this->version );
 		wp_localize_script( $this->plugin_slug . '-admin-script', 'locals', array(
 			'ajax_url' => admin_url( 'admin-ajax.php' )
 		) );
 	}
 
 	function taxonomy_add_new_meta_field ( $tax ) { ?>
-		<tr class="form-field">
-			<td>
+			<div class="open_term_icon_preview form-field">
 				<input type="hidden" name="term_icon_value" id="term_icon_value" value="">
-				<div class="open_term_icon_preview">
-					<span class="open_term_icon_upload button button-secondary" >
-						<?php _e( 'Select Icon', 'pix-category-icons'); ?>
-					</span>
-				</div>
-			</td>
-		</tr>
+				<span class="open_term_icon_upload button button-secondary">
+					<?php _e( 'Select Icon', $this->plugin_slug ); ?>
+				</span>
+			</div>
 		<?php
 	}
 
@@ -144,26 +145,24 @@ class PixCategoryIconsPlugin {
 			$current_value = get_term_meta( $term->term_id, 'pix_term_icon', true );
 		} ?>
 		<tr class="form-field">
-			<th scope="row" valign="top"><label for="term_icon_value"><?php _e( 'icon', 'pix-category-icons' ); ?></label></th>
+			<th scope="row" valign="top"><label for="term_icon_value"><?php _e( 'icon', $this->plugin_slug ); ?></label></th>
 			<td>
-				<input type="hidden" name="term_icon_value" id="term_icon_value" value="<?php echo $current_value; ?>">
-				<?php if ( empty( $current_value ) ) { ?>
 				<div class="open_term_icon_preview">
-					<span class="open_term_icon_upload button button-secondary">
-						<?php _e( 'Select Icon', 'pix-category-icons');?>
-					</span>
+					<input type="hidden" name="term_icon_value" id="term_icon_value" value="<?php echo $current_value; ?>">
+					<?php if ( empty( $current_value ) ) { ?>
+						<span class="open_term_icon_upload button button-secondary">
+							<?php _e( 'Select Icon', $this->plugin_slug );?>
+						</span>
+					<?php } else { ?>
+						<?php echo wp_get_attachment_image( $current_value ); ?>
+						<span class="open_term_icon_upload button button-secondary">
+							<?php _e( 'Select', $this->plugin_slug );?>
+						</span>
+						<span class="open_term_icon_delete button button-secondary">
+							<?php _e( 'Remove', $this->plugin_slug );?>
+						</span>
+				<?php } ?>
 				</div>
-			<?php } else { ?>
-				<div class="open_term_icon_preview">
-					<?php echo wp_get_attachment_image( $current_value ); ?>
-					<span class="open_term_icon_upload button button-secondary">
-						<?php _e( 'Select', 'pix-category-icons');?>
-					</span>
-					<span class="open_term_icon_delete button button-secondary">
-						<?php _e( 'Remove', 'pix-category-icons');?>
-					</span>
-				</div>
-			<?php } ?>
 			</td>
 		</tr>
 		<?php
@@ -191,7 +190,7 @@ class PixCategoryIconsPlugin {
 		$input = array_shift( $current_columns );
 		$new_columns = array(
 			'cb' => $input,
-			'pix-category-icon' => __( 'Icon', $this->plugin_slug ),
+			'pix-taxonomy-icon' => __( 'Icon', $this->plugin_slug ),
 		);
 
 		$new_columns = $new_columns + $current_columns;
@@ -203,11 +202,106 @@ class PixCategoryIconsPlugin {
 		if ( is_numeric( $icon_id ) )  {
 			$src = wp_get_attachment_image_src( $icon_id, 'thumbnail' );
 			if ( isset( $src[0] ) && ! empty( $src[0] ) ) {
-				echo '<div class="pix-category-icon-column_wrap media-icon">';
+				echo '<div class="pix-taxonomy-icon-column_wrap media-icon">';
 					echo '<img src="' . $src[0] . '" width="60px" height="60px" />';
 				echo '</div>';
 			}
 		}
+	}
+
+
+	/**
+	 * create an admin page
+	 */
+	function add_plugin_admin_menu( ) {
+		$this->plugin_screen_hook_suffix = add_options_page(
+			__( 'Taxonomy Icons', $this->plugin_slug ),
+			__( 'Taxonomy Icons', $this->plugin_slug ),
+			'manage_options',
+			$this->plugin_slug, array( $this, 'display_plugin_admin_page' )
+		);
+
+	}
+
+	function plugin_admin_init() {
+		register_setting( 'pix_taxonomy_icons', 'pix_taxonomy_icons', array( $this, 'save_setting_values' ) );
+		add_settings_section(
+			'pix_taxonomy_icons',
+			null,
+			array( $this, 'render_settings_section_title' ),
+			'pix-taxonomy-icons'
+		);
+		add_settings_field('taxonomies', 'Select Taxonomies', array( $this, 'render_taxonomies_select' ), 'pix-taxonomy-icons', 'pix_taxonomy_icons');
+	}
+
+	function render_taxonomies_select ( ) {
+		$taxonomies = get_taxonomies();
+
+		// get the current selected taxonomies
+		$options = get_option('pix_taxonomy_icons');
+
+		$selected_taxonomies = array();
+
+		if ( isset( $options['taxonomies'] ) ) {
+			$selected_taxonomies = $options['taxonomies'];
+		} ?>
+		<field class="select_taxonomies">
+			<?php
+			if ( ! empty( $taxonomies ) || ! is_wp_error( $taxonomies ) ) {
+				foreach ( $taxonomies as $key => $tax ) {
+					$selected = '';
+					if ( ! empty( $selected_taxonomies ) && isset( $selected_taxonomies[$key] ) &&  $selected_taxonomies[$key] = 'on' ) {
+						$selected = ' checked="selected"';
+					}
+					$full_key = 'pix_taxonomy_icons[taxonomies][' . $key  . ']'; ?>
+					<label for="<?php echo $full_key; ?>">
+						<input id='<?php echo $full_key; ?>' name='<?php echo $full_key; ?>' size='40' type='checkbox' <?php echo $selected ?>/>
+						<?php echo $key ?>
+						</br>
+					</label>
+				<?php }
+			}?>
+
+		</field>
+	<?php }
+
+	// this should sanitize things around
+	function save_setting_values( $input ) {
+		return $input;
+	}
+
+	function render_settings_section_title() { ?>
+		<h2><?php _e('Taxonomy Icons Options', $this->plugin_slug); ?></h2>
+	<?php }
+
+	/**
+	 * Render the settings page for this plugin.
+	 */
+	function display_plugin_admin_page() { ?>
+		<div class="wrap" id="taxonomy_icons_form">
+			<div id="icon-options-general" class="icon32"></div>
+			<form action="options.php" method="post">
+				<?php
+				settings_fields('pix_taxonomy_icons');
+				do_settings_sections('pix-taxonomy-icons'); ?>
+				<input name="Submit" type="submit" value="<?php _e('Save Changes', $this->plugin_slug); ?>" />
+			</form>
+		</div>
+	<?php }
+
+	function get_plugin_option( $key ) {
+
+		$options = get_option('pix_taxonomy_icons');
+
+		if ( isset( $options [$key] ) ) {
+			return $options [$key];
+		}
+
+		return null;
+	}
+
+	function get_defaults() {
+		return $this->default_settings;
 	}
 
 	/** Ensure compat with wp 4.4 */
@@ -225,7 +319,7 @@ class PixCategoryIconsPlugin {
 		if ( ! empty($wpdb->collate) )
 			$charset_collate .= " COLLATE $wpdb->collate";
 
-		$blog_tables = "CREATE TABLE {$wpdb->prefix}termmeta (
+		$blog_tables = "CREATE TABLE IF NOT EXISTS {$wpdb->prefix}termmeta (
 		meta_id bigint(20) unsigned NOT NULL auto_increment,
 		term_id bigint(20) unsigned NOT NULL default '0',
 		meta_key varchar(255) default NULL,
@@ -250,100 +344,9 @@ class PixCategoryIconsPlugin {
 			$wpdb->tables[] = str_replace($wpdb->prefix, '', $wpdb->prefix . "termmeta");
 		}
 	}
-
-	/**
-	 * create an admin page
-	 */
-	function add_plugin_admin_menu( ) {
-		$this->plugin_screen_hook_suffix = add_options_page(
-			__( 'Category Icons', $this->plugin_slug ),
-			__( 'Category Icons', $this->plugin_slug ),
-			'manage_options',
-			$this->plugin_slug, array( $this, 'display_plugin_admin_page' )
-		);
-
-	}
-
-	function plugin_admin_init() {
-		register_setting( 'pix_category_icons', 'pix_category_icons', array( $this, 'save_setting_values' ) );
-		add_settings_section(
-			'pix_category_icons',
-			null,
-			array( $this, 'render_settings_section_title' ),
-			'pix-category-icons'
-		);
-		add_settings_field('taxonomies', 'Select Taxonomies', array( $this, 'render_taxonomies_select' ), 'pix-category-icons', 'pix_category_icons');
-	}
-
-	function render_taxonomies_select ( ) {
-		$taxonomies = get_taxonomies();
-
-		// get the current selected taxonomies
-		$options = get_option('pix_category_icons');
-
-		if ( empty( $options ) ) {
-			$options = $this->get_defaults();
-		}
-
-		$selected_taxonomies = array();
-
-		if ( isset( $options['taxonomies'] ) ) {
-			$selected_taxonomies = $options['taxonomies'];
-		} ?>
-		<field class="select_taxonomies">
-			<?php
-			if ( ! empty( $taxonomies ) || ! is_wp_error( $taxonomies ) ) {
-				foreach ( $taxonomies as $key => $tax ) {
-					$selected = '';
-					if ( ! empty( $selected_taxonomies ) && isset( $selected_taxonomies[$key] ) &&  $selected_taxonomies[$key] = 'on' ) {
-						$selected = ' checked="selected"';
-					}
-					$full_key = 'pix_category_icons[taxonomies][' . $key  . ']'; ?>
-					<label for="<?php echo $full_key; ?>">
-						<input id='<?php echo $full_key; ?>' name='<?php echo $full_key; ?>' size='40' type='checkbox' <?php echo $selected ?>/>
-						<?php echo $key ?>
-						</br>
-					</label>
-				<?php }
-			}?>
-
-		</field>
-	<?php }
-
-	// this should sanitize things around
-	function save_setting_values( $input ) {
-		return $input;
-	}
-
-	function render_settings_section_title() { ?>
-		<h2><?php _e('Category Icons Options', 'category_icons_txtd'); ?></h2>
-	<?php }
-
-	/**
-	 * Render the settings page for this plugin.
-	 */
-	function display_plugin_admin_page() {
-		include_once( 'views/admin.php' );
-	}
-
-	function get_plugin_option( $key ) {
-
-		$options = get_option('pix_category_icons');
-
-		if ( isset( $options [$key] ) ) {
-			return $options [$key];
-		}
-
-		return null;
-	}
-
-	function get_defaults() {
-		return $this->default_settings;
-	}
 }
 
-
-
+/** Ensure compat with wp 4.4 */
 if ( ! function_exists( 'add_term_meta' ) ) {
 	/**
 	 * Adds metadata to a term.
@@ -368,7 +371,6 @@ if ( ! function_exists( 'add_term_meta' ) ) {
 		return $added;
 	}
 }
-
 
 if ( ! function_exists( 'delete_term_meta' ) ) {
 	/**

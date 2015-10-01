@@ -10,9 +10,6 @@
 			e.preventDefault();
 			$('#term_icon_value' ).val('');
 
-			console.log( this );
-			console.log( $(this).siblings('img') );
-
 			$(this).siblings('img').remove();
 
 			$(this).remove();
@@ -80,14 +77,14 @@
 						// preview the new value
 						if ( typeof selected_models[0].attributes !== undefined && typeof selected_models[0].attributes.sizes !== 'undefined' && typeof selected_models[0].attributes.sizes.thumbnail !== 'undefined' && typeof selected_models[0].attributes.sizes.thumbnail.url !== "undefined" ) {
 							var thumb_url = selected_models[0].attributes.sizes.thumbnail.url;
-							var $current_img = $(this_container).find('.open_term_icon_preview img');
+							var $current_img = $(this_container).find('img');
 							if ( $current_img.length > 0 ) {
 								$current_img.attr('src', thumb_url);
 							} else {
 								var new_img = $('<img>');
 								new_img.attr('src', thumb_url);
-								$(this_container).find('.open_term_icon_preview' ).append( new_img );
-								$(this_container).find('.open_term_icon_preview' ).append( '<span class="open_term_icon_delete button button-secondary">Delete</span>' );
+								$(this_container).append( new_img );
+								$(this_container).append( '<span class="open_term_icon_delete button button-secondary">Delete</span>' );
 							}
 						}
 					}
@@ -140,23 +137,6 @@
 		};
 
 		$(wp.media.EditTermIconUpload.init);
-	});
-
-	// Clear gallery
-	$('#zip_uploader').on('click', '.clear_gallery', function (e) {
-		e.preventDefault();
-		e.stopImmediatePropagation();
-
-		var curent_val = $('#term_icon_value').val();
-		if ( curent_val !== '' ) {
-			var conf = confirm(locals.pixtypes_l18n.confirmClearGallery);
-			if ( conf ) {
-				$('#term_icon_value').val('');
-				zip_uploader_ajax_preview();
-			}
-		} else {
-			alert(locals.pixtypes_l18n.alertGalleryIsEmpty);
-		}
 	});
 
 })(jQuery);
