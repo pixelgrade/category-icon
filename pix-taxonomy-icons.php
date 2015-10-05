@@ -3,7 +3,7 @@
 Plugin Name: Pix Taxonomy Icons
 Plugin URI:  http://pixelgrade.com
 Description: WordPress taxonomy proofing plugin.
-Version: 0.0.1
+Version: 0.0.2
 Author: PixelGrade
 Author URI: http://pixelgrade.com
 Author Email: contact@pixelgrade.com
@@ -22,7 +22,7 @@ class PixTaxonomyIconsPlugin {
 	protected $plugin_basepath = null;
 	protected $plugin_baseurl = null;
 	protected $plugin_screen_hook_suffix = null;
-	protected $version = '0.0.1';
+	protected $version = '0.0.2';
 	protected $plugin_slug = 'pix-taxonomy-icons';
 	protected $plugin_key = 'pix_taxonomy_icons';
 

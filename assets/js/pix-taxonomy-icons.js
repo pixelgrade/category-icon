@@ -67,27 +67,42 @@
 						current_selection = controller.get('selection' ),
 						selected_models = current_selection.models;
 
-					if ( typeof selected_models[0] !== "undefined" ) {
-						// set value
-						var new_id = selected_models[0].id,
-							$input = $('#term_icon_value' ),
-							this_container = $input.parent();
-
-						$input.val( new_id );
-						// preview the new value
-						if ( typeof selected_models[0].attributes !== undefined && typeof selected_models[0].attributes.sizes !== 'undefined' && typeof selected_models[0].attributes.sizes.thumbnail !== 'undefined' && typeof selected_models[0].attributes.sizes.thumbnail.url !== "undefined" ) {
-							var thumb_url = selected_models[0].attributes.sizes.thumbnail.url;
-							var $current_img = $(this_container).find('img');
-							if ( $current_img.length > 0 ) {
-								$current_img.attr('src', thumb_url);
-							} else {
-								var new_img = $('<img>');
-								new_img.attr('src', thumb_url);
-								$(this_container).append( new_img );
-								$(this_container).append( '<span class="open_term_icon_delete button button-secondary">Delete</span>' );
-							}
-						}
+					// first of all this attachment must be and have attributes
+					// if it is an external url I really don't care
+					if ( typeof selected_models[0] === "undefined" || typeof selected_models[0].attributes === "undefined") {
+						return;
 					}
+
+					// set value
+					var new_id = selected_models[0].id,
+						$input = $('#term_icon_value' ),
+						this_container = $input.parent();
+
+					// preview the new value
+					$input.val( new_id );
+
+					// this function will add the new src to an existing image or will create a new one inside the given container
+					var preview_image = function ( $this_container, src ){
+						var $current_img = $(this_container).find('img');
+						if ( $current_img.length > 0 ) {
+							$current_img.attr('src', src);
+						} else {
+							var new_img = $('<img>');
+							new_img.attr('src', src);
+							console.log( new_img );
+							$(this_container).append( new_img );
+							$(this_container).append( '<span class="open_term_icon_delete button button-secondary">Delete</span>' );
+						}
+					};
+
+					// if is a standard mime jpg or png this attachment will have sizes, other whize a svg will have to go full size in preview
+					if ( typeof selected_models[0].attributes.sizes !== 'undefined' && typeof selected_models[0].attributes.sizes.thumbnail !== 'undefined' && typeof selected_models[0].attributes.sizes.thumbnail.url !== "undefined" ) {
+						var thumb_url = selected_models[0].attributes.sizes.thumbnail.url;
+						preview_image( $(this_container), thumb_url );
+					} else if ( typeof  selected_models[0].attributes.url !== 'undefined') {
+						preview_image( $(this_container), selected_models[0].attributes.url );
+					}
+
 				});
 
 				return this._frame;

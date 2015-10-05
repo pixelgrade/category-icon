@@ -16,6 +16,9 @@ th#pix-taxonomy-icon {
 	top:0; bottom: 0;
 	left: 0; right: 0;
 	z-index: 5;
+	width: 90%;
+	height: 90%;
+	padding: 5%;
 }
 
 .open_term_icon_preview span.open_term_icon_delete {
