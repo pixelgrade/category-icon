@@ -1,13 +1,13 @@
 <?php
 /*
-Plugin Name: Pix Taxonomy Icons
+Plugin Name: Category Icon
 Plugin URI:  http://pixelgrade.com
-Description: WordPress taxonomy proofing plugin.
+Description: Easily add an icon to a category, tag or any other taxonomy.
 Version: 0.5.0
 Author: PixelGrade
 Author URI: http://pixelgrade.com
 Author Email: contact@pixelgrade.com
-Text Domain: pix-taxonomy-icons
+Text Domain: category-icon
 License:     GPL-2.0+
 License URI: http://www.gnu.org/licenses/gpl-2.0.txt
 Domain Path: /lang
@@ -23,8 +23,8 @@ class PixTaxonomyIconsPlugin {
 	protected $plugin_baseurl = null;
 	protected $plugin_screen_hook_suffix = null;
 	protected $version = '0.5.0';
-	protected $plugin_slug = 'pix-taxonomy-icons';
-	protected $plugin_key = 'pix_taxonomy_icons';
+	protected $plugin_slug = 'category-icon';
+	protected $plugin_key = 'category-icon';
 
 	protected $default_settings = array(
 		'taxonomies' => array(
@@ -42,11 +42,11 @@ class PixTaxonomyIconsPlugin {
 		$this->plugin_basepath = plugin_dir_path( __FILE__ );
 		$this->plugin_baseurl = plugin_dir_url( __FILE__ );
 
-		$options = get_option('pix_taxonomy_icons');
+		$options = get_option('category-icon');
 		// ensure some defaults
 		if ( empty( $options ) ) {
 			$options = $this->get_defaults();
-			update_option( 'pix_taxonomy_icons', $options);
+			update_option( 'category-icon', $options);
 		}
 
 		/**
@@ -132,9 +132,9 @@ class PixTaxonomyIconsPlugin {
 	}
 
 	function enqueue_admin_scripts () {
-		wp_enqueue_style( $this->plugin_slug . '-admin-style', plugins_url( 'assets/css/pix-taxonomy-icons.css', __FILE__ ), array(  ), $this->version );
+		wp_enqueue_style( $this->plugin_slug . '-admin-style', plugins_url( 'assets/css/category-icon.css', __FILE__ ), array(  ), $this->version );
 		wp_enqueue_media();
-		wp_enqueue_script( $this->plugin_slug . '-admin-script', plugins_url( 'assets/js/pix-taxonomy-icons.js', __FILE__ ), array( 'jquery' ), $this->version );
+		wp_enqueue_script( $this->plugin_slug . '-admin-script', plugins_url( 'assets/js/category-icon.js', __FILE__ ), array( 'jquery' ), $this->version );
 		wp_localize_script( $this->plugin_slug . '-admin-script', 'locals', array(
 			'ajax_url' => admin_url( 'admin-ajax.php' )
 		) );
@@ -227,25 +227,24 @@ class PixTaxonomyIconsPlugin {
 	 */
 	function add_plugin_admin_menu( ) {
 		$this->plugin_screen_hook_suffix = add_options_page(
-			__( 'Taxonomy Icons', $this->plugin_slug ),
-			__( 'Taxonomy Icons', $this->plugin_slug ),
+			__( 'Category Icon', $this->plugin_slug ),
+			__( 'Category Icon', $this->plugin_slug ),
 			'manage_options',
 			$this->plugin_slug, array( $this, 'display_plugin_admin_page' )
 		);
-
 	}
 
 	function plugin_admin_init() {
 
 
-		register_setting( 'pix_taxonomy_icons', 'pix_taxonomy_icons', array( $this, 'save_setting_values' ) );
+		register_setting( 'category-icon', 'category-icon', array( $this, 'save_setting_values' ) );
 		add_settings_section(
-			'pix_taxonomy_icons',
+			'category-icon',
 			null,
 			array( $this, 'render_settings_section_title' ),
-			'pix-taxonomy-icons'
+			'category-icon'
 		);
-		add_settings_field('taxonomies', 'Select Taxonomies', array( $this, 'render_taxonomies_select' ), 'pix-taxonomy-icons', 'pix_taxonomy_icons');
+		add_settings_field('taxonomies', __( 'Select Taxonomies', 'category-icon' ), array( $this, 'render_taxonomies_select' ), 'category-icon', 'category-icon');
 
 		/**
 		 * Little trick to embed svg in media modal
@@ -260,7 +259,7 @@ class PixTaxonomyIconsPlugin {
 		$taxonomies = get_taxonomies();
 
 		// get the current selected taxonomies
-		$options = get_option('pix_taxonomy_icons');
+		$options = get_option('category-icon');
 
 		$selected_taxonomies = array();
 
@@ -275,7 +274,7 @@ class PixTaxonomyIconsPlugin {
 					if ( ! empty( $selected_taxonomies ) && isset( $selected_taxonomies[$key] ) &&  $selected_taxonomies[$key] = 'on' ) {
 						$selected = ' checked="selected"';
 					}
-					$full_key = 'pix_taxonomy_icons[taxonomies][' . $key  . ']'; ?>
+					$full_key = 'category-icon[taxonomies][' . $key  . ']'; ?>
 					<label for="<?php echo $full_key; ?>">
 						<input id='<?php echo $full_key; ?>' name='<?php echo $full_key; ?>' size='40' type='checkbox' <?php echo $selected ?>/>
 						<?php echo $key ?>
@@ -293,7 +292,7 @@ class PixTaxonomyIconsPlugin {
 	}
 
 	function render_settings_section_title() { ?>
-		<h2><?php _e('Taxonomy Icons Options', $this->plugin_slug); ?></h2>
+		<h2><?php _e('Category Icon Options', $this->plugin_slug); ?></h2>
 	<?php }
 
 	/**
@@ -304,8 +303,8 @@ class PixTaxonomyIconsPlugin {
 			<div id="icon-options-general" class="icon32"></div>
 			<form action="options.php" method="post">
 				<?php
-				settings_fields('pix_taxonomy_icons');
-				do_settings_sections('pix-taxonomy-icons'); ?>
+				settings_fields('category-icon');
+				do_settings_sections('category-icon'); ?>
 				<input name="Submit" type="submit" value="<?php _e('Save Changes', $this->plugin_slug); ?>" />
 			</form>
 		</div>
@@ -313,7 +312,7 @@ class PixTaxonomyIconsPlugin {
 
 	function get_plugin_option( $key ) {
 
-		$options = get_option('pix_taxonomy_icons');
+		$options = get_option('category-icon');
 
 		if ( isset( $options [$key] ) ) {
 			return $options [$key];
@@ -366,7 +365,6 @@ class PixTaxonomyIconsPlugin {
 			$wpdb->tables[] = str_replace($wpdb->prefix, '', $wpdb->prefix . "termmeta");
 		}
 	}
-
 	/**
 	 * Allow svg files to be uploaded
 	 * @param $mimes
