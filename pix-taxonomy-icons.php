@@ -49,7 +49,18 @@ class PixTaxonomyIconsPlugin {
 			update_option( 'pix_taxonomy_icons', $options);
 		}
 
+		/**
+		 * As we code this, WordPress has a problem with uploading and viewing svg files.
+		 * Until they get it done in core, we use these filters
+		 * https://core.trac.wordpress.org/ticket/26256
+		 * and
+		 * https://gist.github.com/Lewiscowles1986/44f059876ec205dd4d27
+		 */
+		add_filter('upload_mimes', array( $this, 'allow_svg_in_mime_types' ) );
+		add_action('admin_head', array( $this, 'force_svg_with_visible_sizes' ) );
+
 		add_action( 'admin_menu', array( $this, 'add_plugin_admin_menu' ) );
+
 		add_action( 'admin_init', array( $this, 'plugin_admin_init' ) );
 
 		// Load plugin text domain
@@ -153,8 +164,9 @@ class PixTaxonomyIconsPlugin {
 						<span class="open_term_icon_upload button button-secondary">
 							<?php _e( 'Select Icon', $this->plugin_slug );?>
 						</span>
-					<?php } else { ?>
-						<?php echo wp_get_attachment_image( $current_value ); ?>
+					<?php } else {
+						$thumb_src = wp_get_attachment_image_src( $current_value );?>
+						<img src="<?php echo $thumb_src[0]; ?>" style="width: 90%; height:90%; padding: 5%" />
 						<span class="open_term_icon_upload button button-secondary">
 							<?php _e( 'Select', $this->plugin_slug );?>
 						</span>
@@ -224,6 +236,8 @@ class PixTaxonomyIconsPlugin {
 	}
 
 	function plugin_admin_init() {
+
+
 		register_setting( 'pix_taxonomy_icons', 'pix_taxonomy_icons', array( $this, 'save_setting_values' ) );
 		add_settings_section(
 			'pix_taxonomy_icons',
@@ -232,6 +246,14 @@ class PixTaxonomyIconsPlugin {
 			'pix-taxonomy-icons'
 		);
 		add_settings_field('taxonomies', 'Select Taxonomies', array( $this, 'render_taxonomies_select' ), 'pix-taxonomy-icons', 'pix_taxonomy_icons');
+
+		/**
+		 * Little trick to embed svg in media modal
+		 * https://gist.github.com/Lewiscowles1986/44f059876ec205dd4d27
+		 */
+		ob_start();
+		add_action('shutdown', array ($this,'on_shutdown'), 0);
+		add_filter('final_output', array( $this,'fix_svg_template'));
 	}
 
 	function render_taxonomies_select ( ) {
@@ -343,6 +365,57 @@ class PixTaxonomyIconsPlugin {
 			//add the shortcut so you can use $wpdb->stats
 			$wpdb->tables[] = str_replace($wpdb->prefix, '', $wpdb->prefix . "termmeta");
 		}
+	}
+
+	/**
+	 * Allow svg files to be uploaded
+	 * @param $mimes
+	 *
+	 * @return mixed
+	 */
+	function allow_svg_in_mime_types($mimes) {
+		if ( ! isset( $mimes['svg'] ) ) {
+			$mimes['svg'] = 'image/svg+xml';
+		}
+		return $mimes;
+	}
+
+	public function on_shutdown() {
+		$final = '';
+		$ob_levels = count(ob_get_level());
+		for ($i = 0; $i < $ob_levels; $i++) {
+			$final .= ob_get_clean();
+		}
+		echo apply_filters('final_output', $final);
+	}
+
+	function force_svg_with_visible_sizes() {
+		echo '<style>
+			svg, img[src*=".svg"] {
+				max-width: 150px !important;
+				max-height: 150px !important;
+			}
+		</style>';
+	}
+
+	public function fix_svg_template($content='') {
+		$content = str_replace(
+			'<# } else if ( \'image\' === data.type && data.sizes && data.sizes.full ) { #>',
+			'<# } else if ( \'svg+xml\' === data.subtype ) { #>
+				<img class="details-image" src="{{ data.url }}" draggable="false" />
+			<# } else if ( \'image\' === data.type && data.sizes && data.sizes.full ) { #>',
+			$content
+		);
+		$content = str_replace(
+			'<# } else if ( \'image\' === data.type && data.sizes ) { #>',
+			'<# } else if ( \'svg+xml\' === data.subtype ) { #>
+				<div class="centered">
+					<img src="{{ data.url }}" class="thumbnail" draggable="false" />
+				</div>
+			<# } else if ( \'image\' === data.type && data.sizes ) { #>',
+			$content
+		);
+		return $content;
 	}
 }
 
