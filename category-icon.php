@@ -3,7 +3,7 @@
 Plugin Name: Category Icon
 Plugin URI:  http://pixelgrade.com
 Description: Easily add an icon to a category, tag or any other taxonomy.
-Version: 0.5.0
+Version: 0.6.0
 Author: PixelGrade
 Author URI: http://pixelgrade.com
 Author Email: contact@pixelgrade.com
@@ -22,7 +22,7 @@ class PixTaxonomyIconsPlugin {
 	protected $plugin_basepath = null;
 	protected $plugin_baseurl = null;
 	protected $plugin_screen_hook_suffix = null;
-	protected $version = '0.5.0';
+	protected $version = '0.6.0';
 	protected $plugin_slug = 'category-icon';
 	protected $plugin_key = 'category-icon';
 
@@ -144,14 +144,14 @@ class PixTaxonomyIconsPlugin {
 		<div class="open_term_icon_preview form-field">
 			<input type="hidden" name="term_icon_value" id="term_icon_value" value="">
 			<span class="open_term_icon_upload button button-secondary">
-				<?php _e( 'Select Icon', 'listable' ); ?>
+				<?php _e( 'Select Icon', 'category-icon' ); ?>
 			</span>
 		</div>
 
 		<div class="open_term_image_preview form-field">
 			<input type="hidden" name="term_image_value" id="term_image_value" value="">
 			<span class="open_term_image_upload button button-secondary">
-				<?php _e( 'Select Image', 'listable' ); ?>
+				<?php _e( 'Select Image', 'category-icon' ); ?>
 			</span>
 		</div>
 		<?php
@@ -191,22 +191,22 @@ class PixTaxonomyIconsPlugin {
 		} ?>
 
 		<tr class="form-field">
-			<th scope="row" valign="top"><label for="term_image_value"><?php esc_html_e( 'Image', 'listable' ); ?></label></th>
+			<th scope="row" valign="top"><label for="term_image_value"><?php esc_html_e( 'Image', 'category-icon' ); ?></label></th>
 			<td>
 				<div class="open_term_image_preview">
 					<input type="hidden" name="term_image_value" id="term_image_value" value="<?php echo $current_image_value; ?>">
 					<?php if ( empty( $current_image_value ) ) { ?>
 						<span class="open_term_image_upload button button-secondary">
-							<?php _e( 'Select Image', 'listable' );?>
+							<?php _e( 'Select Image', 'category-icon' );?>
 						</span>
 					<?php } else {
 						$thumb_src = wp_get_attachment_image_src( $current_image_value );?>
 						<img src="<?php echo $thumb_src[0]; ?>" style="width: 90%; height:90%; padding: 5%" />
 						<span class="open_term_image_upload button button-secondary">
-							<?php esc_html_e( 'Select', 'listable' );?>
+							<?php esc_html_e( 'Select', 'category-icon' );?>
 						</span>
 						<span class="open_term_image_delete button button-secondary">
-							<?php esc_html_e( 'Remove', 'listable' );?>
+							<?php esc_html_e( 'Remove', 'category-icon' );?>
 						</span>
 					<?php } ?>
 				</div>
