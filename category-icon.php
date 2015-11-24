@@ -141,12 +141,19 @@ class PixTaxonomyIconsPlugin {
 	}
 
 	function taxonomy_add_new_meta_field ( $tax ) { ?>
-			<div class="open_term_icon_preview form-field">
-				<input type="hidden" name="term_icon_value" id="term_icon_value" value="">
-				<span class="open_term_icon_upload button button-secondary">
-					<?php _e( 'Select Icon', $this->plugin_slug ); ?>
-				</span>
-			</div>
+		<div class="open_term_icon_preview form-field">
+			<input type="hidden" name="term_icon_value" id="term_icon_value" value="">
+			<span class="open_term_icon_upload button button-secondary">
+				<?php _e( 'Select Icon', 'listable' ); ?>
+			</span>
+		</div>
+
+		<div class="open_term_image_preview form-field">
+			<input type="hidden" name="term_image_value" id="term_image_value" value="">
+			<span class="open_term_image_upload button button-secondary">
+				<?php _e( 'Select Image', 'listable' ); ?>
+			</span>
+		</div>
 		<?php
 	}
 
@@ -156,7 +163,7 @@ class PixTaxonomyIconsPlugin {
 			$current_value = get_term_meta( $term->term_id, 'pix_term_icon', true );
 		} ?>
 		<tr class="form-field">
-			<th scope="row" valign="top"><label for="term_icon_value"><?php _e( 'icon', $this->plugin_slug ); ?></label></th>
+			<th scope="row" valign="top"><label for="term_icon_value"><?php esc_html_e( 'Icon', $this->plugin_slug ); ?></label></th>
 			<td>
 				<div class="open_term_icon_preview">
 					<input type="hidden" name="term_icon_value" id="term_icon_value" value="<?php echo $current_value; ?>">
@@ -178,6 +185,34 @@ class PixTaxonomyIconsPlugin {
 			</td>
 		</tr>
 		<?php
+		$current_image_value = '';
+		if ( isset( $term->term_id ) ) {
+			$current_image_value = get_term_meta( $term->term_id, 'pix_term_image', true );
+		} ?>
+
+		<tr class="form-field">
+			<th scope="row" valign="top"><label for="term_image_value"><?php esc_html_e( 'Image', 'listable' ); ?></label></th>
+			<td>
+				<div class="open_term_image_preview">
+					<input type="hidden" name="term_image_value" id="term_image_value" value="<?php echo $current_image_value; ?>">
+					<?php if ( empty( $current_image_value ) ) { ?>
+						<span class="open_term_image_upload button button-secondary">
+							<?php _e( 'Select Image', 'listable' );?>
+						</span>
+					<?php } else {
+						$thumb_src = wp_get_attachment_image_src( $current_image_value );?>
+						<img src="<?php echo $thumb_src[0]; ?>" style="width: 90%; height:90%; padding: 5%" />
+						<span class="open_term_image_upload button button-secondary">
+							<?php esc_html_e( 'Select', 'listable' );?>
+						</span>
+						<span class="open_term_image_delete button button-secondary">
+							<?php esc_html_e( 'Remove', 'listable' );?>
+						</span>
+					<?php } ?>
+				</div>
+			</td>
+		</tr>
+		<?php
 	}
 
 	function save_taxonomy_custom_meta ( $term_id ) {
@@ -189,6 +224,18 @@ class PixTaxonomyIconsPlugin {
 				$updated = update_term_meta( $term_id, 'pix_term_icon', $value );
 			} else {
 				$updated = update_term_meta( $term_id, 'pix_term_icon', $value, $current_value );
+			}
+			update_termmeta_cache( array( $term_id ) );
+		}
+
+		if ( isset( $_POST['term_image_value'] ) ) {
+			$value_image = $_POST['term_image_value'];
+			$current_value_image = get_term_meta( $term_id, 'pix_term_image', true );
+
+			if ( empty( $current_value_image ) ) {
+				$updated = update_term_meta( $term_id, 'pix_term_image', $value_image );
+			} else {
+				$updated = update_term_meta( $term_id, 'pix_term_image', $value_image, $current_value_image );
 			}
 			update_termmeta_cache( array( $term_id ) );
 		}

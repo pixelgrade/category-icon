@@ -41,3 +41,43 @@ th#pix-taxonomy-icon {
 .open_term_icon_preview:hover  .open_term_icon_delete {
 	display: inline-block;
 }
+
+.open_term_image_preview {
+	width: 150px;
+	height: 150px;
+	background: #ddd;
+	display: block;
+	text-align: center;
+	position: relative;
+}
+
+.open_term_image_preview img {
+	position: absolute;
+	top:0; bottom: 0;
+	left: 0; right: 0;
+	z-index: 5;
+	width: 90%;
+	height: 90%;
+	padding: 5%;
+}
+
+.open_term_image_preview span.open_term_image_delete {
+	display: none;
+	margin: 0 30px 0;
+	position: relative;
+	z-index: 10;
+}
+
+.open_term_image_preview span.open_term_image_upload {
+	display: none;
+	margin: 45px 30px 5px;
+	position: relative;
+	z-index: 10;
+}
+
+.open_term_image_preview:hover .open_term_image_upload{
+	display: inline-block;
+}
+.open_term_image_preview:hover  .open_term_image_delete {
+	display: inline-block;
+}
