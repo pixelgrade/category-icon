@@ -11,11 +11,13 @@ License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
 A WordPress plugin to easily add an icon to a category, tag or any other taxonomy.
 
+** Now supports
+
 == Installation ==
 
 1. Install Category Icon either via the WordPress.org plugin directory, or by uploading the files to your `/wp-content/plugins/` directory
 2. After activating Category Icon go and edit any category or term to see the upload field.
-3. For further instructions and how to filter parameters or overwrite templates, read our [detailed documentation](http://github.com/pixelgrade/pixcodes/blob/dev/README.md)
+3. Now You can add or edit category icons
 
 == Changelog ==
 
