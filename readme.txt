@@ -11,7 +11,7 @@ License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
 A WordPress plugin to easily add an icon to a category, tag or any other taxonomy.
 
-** Now supports
+** Now supports a category featured image field
 
 == Installation ==
 
