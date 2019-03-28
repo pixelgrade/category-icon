@@ -427,7 +427,7 @@ class PixTaxonomyIconsPlugin {
 
 	public function on_shutdown() {
 		$final = '';
-		$ob_levels = count(ob_get_level());
+		$ob_levels = ob_get_level();
 		for ($i = 0; $i < $ob_levels; $i++) {
 			$final .= ob_get_clean();
 		}
