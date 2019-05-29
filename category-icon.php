@@ -256,22 +256,22 @@ class PixTaxonomyIconsPlugin {
 		return $new_columns;
 	}
 
-	function output_custom_tax_column(  $value, $name, $id ) {
+	function output_custom_tax_column( $value, $column_name, $id ) {
 
-		if ( $value && is_admin() ){
-			echo $value;
-			return;
-		}
+	    if( $column_name !== 'pix-taxonomy-icon'){
+	        return $value;
+        }
 
-		$icon_id = get_term_meta( $id, 'pix_term_icon', true );
-		if ( is_numeric( $icon_id ) )  {
+	    $icon_id = get_term_meta( $id, 'pix_term_icon', true );
+		if ( is_numeric( $icon_id ) ) {
 			$src = wp_get_attachment_image_src( $icon_id, 'thumbnail' );
 			if ( isset( $src[0] ) && ! empty( $src[0] ) ) {
-				echo '<div class="pix-taxonomy-icon-column_wrap media-icon">';
-					echo '<img src="' . $src[0] . '" width="60px" height="60px" />';
-				echo '</div>';
+				$value = '<div class="pix-taxonomy-icon-column_wrap media-icon"><img src="' . $src[0] . '" width="60px" height="60px" /></div>';
 			}
 		}
+
+		return $value;
+
 	}
 
 
