@@ -258,7 +258,7 @@ class PixTaxonomyIconsPlugin {
 
 	function output_custom_tax_column(  $value, $name, $id ) {
 
-		if ( $value & is_admin() ){
+		if ( $value && is_admin() ){
 			echo $value;
 			return;
 		}
