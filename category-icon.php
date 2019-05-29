@@ -257,6 +257,12 @@ class PixTaxonomyIconsPlugin {
 	}
 
 	function output_custom_tax_column(  $value, $name, $id ) {
+
+		if ( $value && is_admin() ){
+			echo $value;
+			return;
+		}
+
 		$icon_id = get_term_meta( $id, 'pix_term_icon', true );
 		if ( is_numeric( $icon_id ) )  {
 			$src = wp_get_attachment_image_src( $icon_id, 'thumbnail' );
