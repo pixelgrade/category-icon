@@ -1,0 +1,26 @@
+{
+  "name": "category-icon",
+  "version": "1.0.0",
+  "description": "=== Category Icon === Contributors: euthelup, babbardel, pixelgrade Tags: category, taxonomy, term, icon, image, Requires at least: 4.0.0 Tested up to: 4.3.1 Stable tag: 0.6.0 License: GPLv2 or later License URI: http://www.gnu.org/licenses/gpl-2.0.html",
+  "main": "gulpfile.js",
+  "dependencies": {
+    "gulp": "^3.9.1",
+    "gulp-clean": "^0.4.0",
+    "gulp-exec": "^3.0.2",
+    "gulp-zip": "^5.0.0"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/pixelgrade/category-icon.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/pixelgrade/category-icon/issues"
+  },
+  "homepage": "https://github.com/pixelgrade/category-icon#readme"
+}
