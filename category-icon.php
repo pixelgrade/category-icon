@@ -22,7 +22,7 @@ class PixTaxonomyIconsPlugin {
 	protected $plugin_basepath = null;
 	protected $plugin_baseurl = null;
 	protected $plugin_screen_hook_suffix = null;
-	protected $version = '0.6.0';
+	protected $version = '0.7.0';
 	protected $plugin_slug = 'category-icon';
 	protected $plugin_key = 'category-icon';
 
