@@ -1,5 +1,5 @@
 (function ($) {
-	$(window).load(function () {
+	$(window).on('load', function () {
 
 		$(document).on('click', '.open_term_icon_upload', function (e) {
 			e.preventDefault();
@@ -156,7 +156,7 @@
 
 
 
-	$(window).load(function () {
+	$(window).on('load', function () {
 
 		$(document).on('click', '.open_term_image_upload', function (e) {
 			e.preventDefault();
