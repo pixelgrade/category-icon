@@ -3,7 +3,7 @@
 Plugin Name: Category Icon
 Plugin URI:  http://pixelgrade.com
 Description: Easily add an icon to a category, tag or any other taxonomy.
-Version: 0.7.1
+Version: 0.8.0
 Author: PixelGrade
 Author URI: http://pixelgrade.com
 Author Email: contact@pixelgrade.com
@@ -12,6 +12,11 @@ License:     GPL-2.0+
 License URI: http://www.gnu.org/licenses/gpl-2.0.txt
 Domain Path: /lang
 */
+
+// If this file is called directly, abort.
+if ( ! defined( 'ABSPATH' ) ) {
+	die;
+}
 
 global $pixtaxonomyicons_plugin;
 $pixtaxonomyicons_plugin = PixTaxonomyIconsPlugin::get_instance();
@@ -22,7 +27,7 @@ class PixTaxonomyIconsPlugin {
 	protected $plugin_basepath = null;
 	protected $plugin_baseurl = null;
 	protected $plugin_screen_hook_suffix = null;
-	protected $version = '0.6.0';
+	protected $version = '0.8.0';
 	protected $plugin_slug = 'category-icon';
 	protected $plugin_key = 'category-icon';
 
@@ -41,6 +46,8 @@ class PixTaxonomyIconsPlugin {
 
 		$this->plugin_basepath = plugin_dir_path( __FILE__ );
 		$this->plugin_baseurl = plugin_dir_url( __FILE__ );
+
+		require_once( 'inc/extras.php');
 
 		$options = get_option('category-icon');
 		// ensure some defaults
