@@ -1,7 +1,7 @@
 === Category Icon ===
-Contributors: euthelup, babbardel, pixelgrade
-Tags: category, taxonomy, term, icon, image,
-Requires at least: 4.9.0
+Contributors: pixelgrade, vlad.olaru, babbardel
+Tags: category, taxonomy, term, icon, image
+Requires at least: 4.9.9
 Tested up to: 5.9.0
 Stable tag: 0.8.0
 License: GPLv2 or later
@@ -9,9 +9,11 @@ License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
 == Description ==
 
-A WordPress plugin to easily add an icon to a category, tag or any other taxonomy.
+A WordPress plugin to easily attach an icon to a category, tag or any other taxonomy term.
 
-** Now supports a category featured image field
+** Now supports a category, tag or any other taxonomy image field, also.
+
+Please note that this plugin will not automatically output the icon or the image on the frontend of our site. It is up to you to query and output in your theme.
 
 == Installation ==
 
@@ -24,6 +26,7 @@ A WordPress plugin to easily add an icon to a category, tag or any other taxonom
 = 0.8.0 =
 * Ensure compatibility with WordPress 5.9
 * Add getters for term icon and image.
+* Clarify description and instructions about what this plugin does and doesn't do.
 
 = 0.7.1 =
 * Improve compatibility with WordPress 5.7

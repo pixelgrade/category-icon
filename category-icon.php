@@ -2,7 +2,7 @@
 /*
 Plugin Name: Category Icon
 Plugin URI:  http://pixelgrade.com
-Description: Easily add an icon to a category, tag or any other taxonomy.
+Description: Easily attach an icon and/or an image to a category, tag or any other taxonomy term.
 Version: 0.8.0
 Author: PixelGrade
 Author URI: http://pixelgrade.com
@@ -139,9 +139,9 @@ class PixTaxonomyIconsPlugin {
 	}
 
 	function enqueue_admin_scripts () {
-		wp_enqueue_style( $this->plugin_slug . '-admin-style', plugins_url( 'assets/css/category-icon.css', __FILE__ ), array(  ), $this->version );
+		wp_enqueue_style( $this->plugin_slug . '-admin-style', plugins_url( 'assets/admin/css/category-icon.css', __FILE__ ), array(  ), $this->version );
 		wp_enqueue_media();
-		wp_enqueue_script( $this->plugin_slug . '-admin-script', plugins_url( 'assets/js/category-icon.js', __FILE__ ), array( 'jquery' ), $this->version );
+		wp_enqueue_script( $this->plugin_slug . '-admin-script', plugins_url( 'assets/admin/js/category-icon.js', __FILE__ ), array( 'jquery' ), $this->version );
 		wp_localize_script( $this->plugin_slug . '-admin-script', 'locals', array(
 			'ajax_url' => admin_url( 'admin-ajax.php' )
 		) );

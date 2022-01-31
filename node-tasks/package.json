@@ -1,0 +1,10 @@
+{
+    "name": "listable-node-tasks",
+    "description": "Tasks related to the node version required.",
+    "private": false,
+    "sideEffects": false,
+    "license": "GPL-2.0+",
+    "dependencies": {
+        "semver": "^7.3.5"
+    }
+}
