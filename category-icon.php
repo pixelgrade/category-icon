@@ -1,17 +1,20 @@
 <?php
-/*
-Plugin Name: Category Icon
-Plugin URI:  http://pixelgrade.com
-Description: Easily attach an icon and/or an image to a category, tag or any other taxonomy term.
-Version: 0.8.0
-Author: PixelGrade
-Author URI: http://pixelgrade.com
-Author Email: contact@pixelgrade.com
-Text Domain: category-icon
-License:     GPL-2.0+
-License URI: http://www.gnu.org/licenses/gpl-2.0.txt
-Domain Path: /lang
-*/
+/**
+ * Plugin Name: Category Icon
+ * Plugin URI:  http://pixelgrade.com
+ * Description: Easily attach an icon and/or an image to a category, tag or any other taxonomy term.
+ * Version: 1.0.0
+ * Author: Pixelgrade
+ * Author URI: http://pixelgrade.com
+ * Author Email: contact@pixelgrade.com
+ * Text Domain: category-icon
+ * License:     GPL-2.0+
+ * License URI: http://www.gnu.org/licenses/gpl-2.0.txt
+ * Domain Path: /lang
+ * Requires at least: 4.9.19
+ * Tested up to:      5.9.0
+ * Requires PHP:      5.6.40
+ */
 
 // If this file is called directly, abort.
 if ( ! defined( 'ABSPATH' ) ) {
@@ -27,7 +30,7 @@ class PixTaxonomyIconsPlugin {
 	protected $plugin_basepath = null;
 	protected $plugin_baseurl = null;
 	protected $plugin_screen_hook_suffix = null;
-	protected $version = '0.8.0';
+	protected $version = '1.0.0';
 	protected $plugin_slug = 'category-icon';
 	protected $plugin_key = 'category-icon';
 
