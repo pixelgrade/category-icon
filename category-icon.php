@@ -3,7 +3,7 @@
 Plugin Name: Category Icon
 Plugin URI:  http://pixelgrade.com
 Description: Easily add an icon to a category, tag or any other taxonomy.
-Version: 0.6.0
+Version: 0.8.0
 Author: PixelGrade
 Author URI: http://pixelgrade.com
 Author Email: contact@pixelgrade.com
@@ -12,6 +12,11 @@ License:     GPL-2.0+
 License URI: http://www.gnu.org/licenses/gpl-2.0.txt
 Domain Path: /lang
 */
+
+// If this file is called directly, abort.
+if ( ! defined( 'ABSPATH' ) ) {
+	die;
+}
 
 global $pixtaxonomyicons_plugin;
 $pixtaxonomyicons_plugin = PixTaxonomyIconsPlugin::get_instance();
@@ -22,7 +27,7 @@ class PixTaxonomyIconsPlugin {
 	protected $plugin_basepath = null;
 	protected $plugin_baseurl = null;
 	protected $plugin_screen_hook_suffix = null;
-	protected $version = '0.7.0';
+	protected $version = '0.8.0';
 	protected $plugin_slug = 'category-icon';
 	protected $plugin_key = 'category-icon';
 
@@ -41,6 +46,8 @@ class PixTaxonomyIconsPlugin {
 
 		$this->plugin_basepath = plugin_dir_path( __FILE__ );
 		$this->plugin_baseurl = plugin_dir_url( __FILE__ );
+
+		require_once( 'inc/extras.php');
 
 		$options = get_option('category-icon');
 		// ensure some defaults
@@ -468,162 +475,4 @@ class PixTaxonomyIconsPlugin {
 		);
 		return $content;
 	}
-}
-
-/** Ensure compat with wp 4.4 */
-if ( ! function_exists( 'add_term_meta' ) ) {
-	/**
-	 * Adds metadata to a term.
-	 *
-	 * @since 4.4.0
-	 *
-	 * @param int    $term_id    Term ID.
-	 * @param string $meta_key   Metadata name.
-	 * @param mixed  $meta_value Metadata value.
-	 * @param bool   $unique     Optional. Whether to bail if an entry with the same key is found for the term.
-	 *                           Default false.
-	 * @return int|bool Meta ID on success, false on failure.
-	 */
-	function add_term_meta( $term_id, $meta_key, $meta_value, $unique = false ) {
-		$added = add_metadata( 'term', $term_id, $meta_key, $meta_value, $unique );
-
-		// Bust term query cache.
-		if ( $added ) {
-			wp_cache_set( 'last_changed', microtime(), 'terms' );
-		}
-
-		return $added;
-	}
-}
-
-if ( ! function_exists( 'delete_term_meta' ) ) {
-	/**
-	 * Removes metadata matching criteria from a term.
-	 *
-	 * @since 4.4.0
-	 *
-	 * @param int    $term_id    Term ID.
-	 * @param string $meta_key   Metadata name.
-	 * @param mixed  $meta_value Optional. Metadata value. If provided, rows will only be removed that match the value.
-	 * @return bool True on success, false on failure.
-		 */
-	function delete_term_meta( $term_id, $meta_key, $meta_value = '' ) {
-		$deleted = delete_metadata( 'term', $term_id, $meta_key, $meta_value );
-
-		// Bust term query cache.
-		if ( $deleted ) {
-			wp_cache_set( 'last_changed', microtime(), 'terms' );
-		}
-
-		return $deleted;
-	}
-}
-
-if ( ! function_exists( 'get_term_meta' ) ) {
-	/**
-	 * Retrieves metadata for a term.
-	 *
-	 * @since 4.4.0
-	 *
-	 * @param int $term_id Term ID.
-	 * @param string $key Optional. The meta key to retrieve. If no key is provided, fetches all metadata for the term.
-	 * @param bool $single Whether to return a single value. If false, an array of all values matching the
-	 *                        `$term_id`/`$key` pair will be returned. Default: false.
-	 *
-	 * @return mixed If `$single` is false, an array of metadata values. If `$single` is true, a single metadata value.
-	 */
-	function get_term_meta( $term_id, $key = '', $single = false ) {
-		return get_metadata( 'term', $term_id, $key, $single );
-	}
-}
-
-if ( ! function_exists( 'update_term_meta' ) ) {
-	/**
-	 * Updates term metadata.
-	 *
-	 * Use the `$prev_value` parameter to differentiate between meta fields with the same key and term ID.
-	 *
-	 * If the meta field for the term does not exist, it will be added.
-	 *
-	 * @since 4.4.0
-	 *
-	 * @param int $term_id Term ID.
-	 * @param string $meta_key Metadata key.
-	 * @param mixed $meta_value Metadata value.
-	 * @param mixed $prev_value Optional. Previous value to check before removing.
-	 *
-	 * @return int|bool Meta ID if the key didn't previously exist. True on successful update. False on failure.
-	 */
-	function update_term_meta( $term_id, $meta_key, $meta_value, $prev_value = '' ) {
-		$updated = update_metadata( 'term', $term_id, $meta_key, $meta_value, $prev_value );
-
-		// Bust term query cache.
-		if ( $updated ) {
-			wp_cache_set( 'last_changed', microtime(), 'terms' );
-		}
-
-		return $updated;
-	}
-}
-
-if ( ! function_exists( 'update_termmeta_cache' ) ) {
-	/**
-	 * Updates metadata cache for list of term IDs.
-	 *
-	 * Performs SQL query to retrieve all metadata for the terms matching `$term_ids` and stores them in the cache.
-	 * Subsequent calls to `get_term_meta()` will not need to query the database.
-	 *
-	 * @since 4.4.0
-	 *
-	 * @param array $term_ids List of term IDs.
-	 *
-	 * @return array|false Returns false if there is nothing to update. Returns an array of metadata on success.
-	 */
-	function update_termmeta_cache( $term_ids ) {
-		return update_meta_cache( 'term', $term_ids );
-	}
-}
-
-if ( ! function_exists( 'wp_lazyload_term_meta' ) ) {
-	function wp_lazyload_term_meta( $check, $term_id ) {
-		global $wp_query;
-
-		if ( $wp_query instanceof WP_Query && ! empty( $wp_query->posts ) && $wp_query->get( 'update_post_term_cache' ) ) {
-			// We can only lazyload if the entire post object is present.
-			$posts = array();
-			foreach ( $wp_query->posts as $post ) {
-				if ( $post instanceof WP_Post ) {
-					$posts[] = $post;
-				}
-			}
-
-			if ( empty( $posts ) ) {
-				return;
-			}
-
-			// Fetch cached term_ids for each post. Keyed by term_id for faster lookup.
-			$term_ids = array();
-			foreach ( $posts as $post ) {
-				$taxonomies = get_object_taxonomies( $post->post_type );
-				foreach ( $taxonomies as $taxonomy ) {
-					// No extra queries. Term cache should already be primed by 'update_post_term_cache'.
-					$terms = get_object_term_cache( $post->ID, $taxonomy );
-					if ( false !== $terms ) {
-						foreach ( $terms as $term ) {
-							if ( ! isset( $term_ids[ $term->term_id ] ) ) {
-								$term_ids[ $term->term_id ] = 1;
-							}
-						}
-					}
-				}
-			}
-
-			if ( $term_ids ) {
-				update_termmeta_cache( array_keys( $term_ids ) );
-			}
-		}
-
-		return $check;
-	}
-	add_filter( 'get_term_metadata',        'wp_lazyload_term_meta',        10, 2 );
 }
