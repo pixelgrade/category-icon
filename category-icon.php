@@ -12,7 +12,7 @@
  * License URI: http://www.gnu.org/licenses/gpl-2.0.txt
  * Domain Path: /lang
  * Requires at least: 4.9.19
- * Tested up to:      5.9.0
+ * Tested up to:      6.6.2
  * Requires PHP:      5.6.40
  */
 
@@ -62,11 +62,9 @@ class PixTaxonomyIconsPlugin {
 		/**
 		 * As we code this, WordPress has a problem with uploading and viewing svg files.
 		 * Until they get it done in core, we use these filters
-		 * https://core.trac.wordpress.org/ticket/26256
-		 * and
-		 * https://gist.github.com/Lewiscowles1986/44f059876ec205dd4d27
 		 */
 		add_filter('upload_mimes', array( $this, 'allow_svg_in_mime_types' ) );
+		add_filter('wp_handle_upload_prefilter', array($this, 'sanitize_svg_upload'));
 		add_action('admin_head', array( $this, 'force_svg_with_visible_sizes' ) );
 
 		add_action( 'admin_menu', array( $this, 'add_plugin_admin_menu' ) );
@@ -82,6 +80,83 @@ class PixTaxonomyIconsPlugin {
 
 		register_activation_hook( __FILE__, array($this, 'activate') );
 	}
+
+	/**
+	 * Handles the SVG upload process by sanitizing the file content,
+	 * generating a random filename, and preserving the original upload path.
+	 *
+	 * @param array $file The uploaded file information.
+	 * @return array The modified file information with sanitized content and updated filename.
+	 */
+	public function sanitize_svg_upload($file) {
+		// Check if the uploaded file is an SVG
+		if ($file['type'] === 'image/svg+xml') {
+			// Step 1: Read the original SVG content from the temporary file location
+			$svg_content = file_get_contents($file['tmp_name']);
+			
+			// Step 2: Sanitize the SVG content to remove any potentially unsafe elements
+			$clean_svg = $this->sanitize_svg_content($svg_content);
+
+			// Step 3: Extract the original file name (without extension) for use in the new name
+			$original_name = pathinfo($file['name'], PATHINFO_FILENAME);
+
+			// Step 4: Sanitize the original name to ensure no special characters remain
+			$sanitized_name = sanitize_file_name($original_name);
+
+			// Step 5: Generate a unique filename by appending a random suffix to the sanitized name
+			$random_suffix = wp_generate_password(6, false);
+			$new_filename = "{$sanitized_name}-{$random_suffix}.svg";
+
+			// Step 6: Overwrite the temporary file with the sanitized SVG content
+			file_put_contents($file['tmp_name'], $clean_svg);
+
+			// Step 7: Update the file's displayed name, leaving tmp_name intact for WordPress to handle
+			$file['name'] = $new_filename;
+		}
+		
+		// Return the updated file information back to WordPress
+		return $file;
+	}
+
+	/**
+	 * Sanitizes SVG content by removing <script> elements and any unsafe attributes.
+	 * This helps mitigate potential XSS vulnerabilities from SVG uploads.
+	 *
+	 * @param string $svg_content The raw SVG content to be sanitized.
+	 * @return string The sanitized SVG content.
+	 */
+	private function sanitize_svg_content($svg_content) {
+		// Create a new DOMDocument instance to parse the SVG XML content
+		$dom = new DOMDocument();
+		
+		// Suppress XML parsing errors for invalid SVG formats
+		libxml_use_internal_errors(true);
+		
+		// Load the SVG content into the DOMDocument for manipulation
+		$dom->loadXML($svg_content, LIBXML_NOENT | LIBXML_DTDLOAD);
+		
+		// Clear any XML parsing errors
+		libxml_clear_errors();
+		
+		// Step 1: Remove any <script> elements, which can execute JavaScript
+		$scripts = $dom->getElementsByTagName('script');
+		while ($scripts->length > 0) {
+			$scripts->item(0)->parentNode->removeChild($scripts->item(0));
+		}
+
+		// Step 2: Remove unsafe attributes that could contain JavaScript (like onclick, onload)
+		$xpath = new DOMXPath($dom);
+		foreach ($xpath->query('//@*') as $attr) {
+			if (stripos($attr->name, 'on') === 0 || stripos($attr->value, 'javascript:') === 0) {
+				$attr->parentNode->removeAttribute($attr->name);
+			}
+		}
+
+		// Return the sanitized SVG content as XML
+		return $dom->saveXML();
+	}
+	
+	
 
 	/**
 	 * This will run when the plugin will turn On
