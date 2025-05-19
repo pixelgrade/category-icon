@@ -3,7 +3,7 @@
  * Plugin Name: Category Icon
  * Plugin URI:  http://pixelgrade.com
  * Description: Easily attach an icon and/or an image to a category, tag or any other taxonomy term.
- * Version: 1.0.0
+ * Version: 1.0.2
  * Author: Pixelgrade
  * Author URI: http://pixelgrade.com
  * Author Email: contact@pixelgrade.com
@@ -12,7 +12,7 @@
  * License URI: http://www.gnu.org/licenses/gpl-2.0.txt
  * Domain Path: /lang
  * Requires at least: 4.9.19
- * Tested up to:      6.6.2
+ * Tested up to:      6.8.1
  * Requires PHP:      5.6.40
  */
 
@@ -30,7 +30,7 @@ class PixTaxonomyIconsPlugin {
 	protected $plugin_basepath = null;
 	protected $plugin_baseurl = null;
 	protected $plugin_screen_hook_suffix = null;
-	protected $version = '1.0.0';
+	protected $version = '1.0.2';
 	protected $plugin_slug = 'category-icon';
 	protected $plugin_key = 'category-icon';
 
@@ -119,42 +119,89 @@ class PixTaxonomyIconsPlugin {
 	}
 
 	/**
-	 * Sanitizes SVG content by removing <script> elements and any unsafe attributes.
-	 * This helps mitigate potential XSS vulnerabilities from SVG uploads.
+	 * Sanitize raw SVG markup before it is stored in the uploads directory.
 	 *
-	 * @param string $svg_content The raw SVG content to be sanitized.
-	 * @return string The sanitized SVG content.
+	 * The function loads the SVG into a DOMDocument *without* expanding external
+	 * entities or allowing network I/O, preventing XXE/SSRF.  After a successful
+	 * parse it walks the document and strips any element or attribute that is not
+	 * explicitly allow-listed.
+	 *
+	 * @param  string $svg_content Raw SVG file contents.
+	 * @return string              Clean SVG (empty string on failure or if unsafe).
 	 */
-	private function sanitize_svg_content($svg_content) {
-		// Create a new DOMDocument instance to parse the SVG XML content
-		$dom = new DOMDocument();
-		
-		// Suppress XML parsing errors for invalid SVG formats
-		libxml_use_internal_errors(true);
-		
-		// Load the SVG content into the DOMDocument for manipulation
-		$dom->loadXML($svg_content, LIBXML_NOENT | LIBXML_DTDLOAD);
-		
-		// Clear any XML parsing errors
-		libxml_clear_errors();
-		
-		// Step 1: Remove any <script> elements, which can execute JavaScript
-		$scripts = $dom->getElementsByTagName('script');
-		while ($scripts->length > 0) {
-			$scripts->item(0)->parentNode->removeChild($scripts->item(0));
+	private function sanitize_svg_content( $svg_content ) {
+		// Collect libxml errors internally – we decide what to do with them.
+		libxml_use_internal_errors( true );
+
+		$dom       = new DOMDocument();
+		$load_opts = LIBXML_NONET        // deny all network access (blocks XXE/SSRF)
+					| LIBXML_NOERROR     // suppress warnings
+					| LIBXML_NOWARNING;  // suppress notices
+
+		// PHP < 8.0 still allows the entity loader unless we disable it globally.
+		if ( PHP_VERSION_ID < 80000 ) {
+			$previous_loader_state = libxml_disable_entity_loader( true ); // phpcs:ignore PHPCompatibility.Extensions.RemovedFunctions
 		}
 
-		// Step 2: Remove unsafe attributes that could contain JavaScript (like onclick, onload)
-		$xpath = new DOMXPath($dom);
-		foreach ($xpath->query('//@*') as $attr) {
-			if (stripos($attr->name, 'on') === 0 || stripos($attr->value, 'javascript:') === 0) {
-				$attr->parentNode->removeAttribute($attr->name);
+		// Abort if XML is invalid *or* references external entities.
+		if ( ! $dom->loadXML( $svg_content, $load_opts ) ) {
+			if ( PHP_VERSION_ID < 80000 ) {
+				libxml_disable_entity_loader( $previous_loader_state ); // restore
+			}
+			return ''; // fail closed
+		}
+
+		// Restore global entity loader setting for legacy PHP versions.
+		if ( PHP_VERSION_ID < 80000 ) {
+			libxml_disable_entity_loader( $previous_loader_state );
+		}
+
+		/* --------------------------------------------------------------------
+		* Phase 2 – Allow-list-based cleanup
+		* ------------------------------------------------------------------ */
+
+		$allowed_tags = array(
+			'svg', 'g', 'path', 'polygon', 'circle', 'ellipse', 'line',
+			'polyline', 'rect', 'use', 'defs', 'linearGradient',
+			'radialGradient', 'stop', 'clipPath', 'mask', 'title', 'desc',
+		);
+
+		$allowed_attrs = array(
+			'id', 'class', 'fill', 'stroke', 'stroke-width', 'stroke-linecap',
+			'stroke-linejoin', 'stroke-miterlimit', 'stroke-dasharray',
+			'stroke-dashoffset', 'transform', 'd', 'points', 'x', 'y', 'cx',
+			'cy', 'r', 'rx', 'ry', 'width', 'height', 'x1', 'y1', 'x2', 'y2',
+			'gradientUnits', 'gradientTransform', 'offset', 'stop-color',
+			'stop-opacity', 'viewBox', 'xmlns', 'version',
+			'preserveAspectRatio',
+		);
+
+		$xpath = new DOMXPath( $dom );
+
+		/** @var DOMElement $node */
+		foreach ( $xpath->query( '//*' ) as $node ) {
+			// Drop any element that is not allowed.
+			if ( ! in_array( $node->nodeName, $allowed_tags, true ) ) {
+				$node->parentNode->removeChild( $node );
+				continue;
+			}
+
+			// Prune disallowed attributes.
+			if ( $node->hasAttributes() ) {
+				/** @var DOMAttr $attr */
+				foreach ( iterator_to_array( $node->attributes ) as $attr ) {
+					if ( ! in_array( $attr->nodeName, $allowed_attrs, true ) ) {
+						$node->removeAttributeNode( $attr );
+					}
+				}
 			}
 		}
 
-		// Return the sanitized SVG content as XML
-		return $dom->saveXML();
+		// Return compact, sanitized SVG.
+		$dom->formatOutput = false;
+		return $dom->saveXML( $dom->documentElement );
 	}
+
 	
 	
 

@@ -2,9 +2,9 @@
 Contributors: pixelgrade, vlad.olaru, babbardel
 Tags: category, taxonomy, term, icon, image
 Requires at least: 4.9.19
-Tested up to: 6.6.2
+Tested up to: 6.8.1
 Requires PHP: 5.6.40
-Stable tag: 1.0.1
+Stable tag: 1.0.2
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -25,6 +25,9 @@ It is up to you to query and output in your theme using the provided getter func
 3. Now you can add or edit category, tags or any other taxonomy terms icons.
 
 == Changelog ==
+
+= 1.0.2 =
+* Security: patched blind XXE/SSRF in SVG upload flow – external entity loading and network access are now disabled; malformed SVGs are rejected (fail-closed).
 
 = 1.0.1 =
 * Added sanitization for SVG uploads to prevent Cross-Site Scripting (XSS) vulnerabilities.
