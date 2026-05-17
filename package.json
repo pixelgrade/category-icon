@@ -1,13 +1,13 @@
 {
   "name": "category-icon",
-  "version": "1.0.0",
+  "version": "1.0.4",
   "description": "WordPress plugin to easily attach an icon and/or an image to a category, tag or any other taxonomy term.",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/pixelgrade/category-icon.git"
   },
   "author": "",
-  "license": "ISC",
+  "license": "GPL-2.0-or-later",
   "bugs": {
     "url": "https://github.com/pixelgrade/category-icon/issues"
   },

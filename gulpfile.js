@@ -47,6 +47,9 @@ function removeUnneededFiles (done) {
 		'.travis.yml',
 		'.babelrc',
 		'.gitignore',
+		'.claude',
+		'.node-version',
+		'.nvmrc',
 		'.codeclimate.yml',
 		'.csslintrc',
 		'.eslintignore',
@@ -87,6 +90,7 @@ function removeUnneededFiles (done) {
 		'.jshintignore',
 		'browserslist',
 		'babel.config.js',
+		'prompt-customify.xml',
 
 		'admin/scss',
 		'admin/src',

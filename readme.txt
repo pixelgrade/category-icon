@@ -1,12 +1,14 @@
 === Category Icon ===
 Contributors: pixelgrade, vlad.olaru, babbardel
 Tags: category, taxonomy, term, icon, image
-Requires at least: 4.9.19
-Tested up to: 6.8.1
-Requires PHP: 5.6.40
-Stable tag: 1.0.2
-License: GPLv2 or later
+Requires at least: 5.9.0
+Tested up to: 7.0
+Requires PHP: 7.4
+Stable tag: 1.0.4
+License: GPL-2.0-or-later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
+
+A WordPress plugin to attach an icon and/or image to taxonomy terms.
 
 == Description ==
 
@@ -25,6 +27,17 @@ It is up to you to query and output in your theme using the provided getter func
 3. Now you can add or edit category, tags or any other taxonomy terms icons.
 
 == Changelog ==
+
+= 1.0.4 =
+* Updated WordPress compatibility metadata for WordPress 7.0.
+* Fixed Plugin Check errors in the release package.
+* Hardened taxonomy term meta saving with explicit nonce and capability checks.
+* Escaped taxonomy admin output and sanitized settings values.
+* Scoped admin assets and SVG upload handling to Category Icon taxonomy screens.
+* Replaced the legacy SVG media modal output buffer with attachment response data.
+
+= 1.0.3 =
+* Security: sanitize and strictly validate term icon / image IDs on save and escape them on output to prevent XSS via the `term_icon_value` and `term_image_value` fields, even for Editor-level users.
 
 = 1.0.2 =
 * Security: patched blind XXE/SSRF in SVG upload flow – external entity loading and network access are now disabled; malformed SVGs are rejected (fail-closed).

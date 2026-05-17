@@ -89,7 +89,6 @@
 						} else {
 							var new_img = $('<img>');
 							new_img.attr('src', src);
-							console.log( new_img );
 							$(this_container).append( new_img );
 							$(this_container).append( '<span class="open_term_icon_delete button button-secondary">Delete</span>' );
 						}
@@ -246,7 +245,6 @@
 						} else {
 							var new_img = $('<img>');
 							new_img.attr('src', src);
-							console.log( new_img );
 							$(this_container).append( new_img );
 							$(this_container).append( '<span class="open_term_image_delete button button-secondary">Delete</span>' );
 						}

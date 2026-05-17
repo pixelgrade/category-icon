@@ -9,3 +9,4 @@ admin/js/*.map
 *.map
 .DS_Store
 *.sublime-workspace
+.claude

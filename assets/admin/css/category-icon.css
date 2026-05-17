@@ -81,3 +81,9 @@ th#pix-taxonomy-icon {
 .open_term_image_preview:hover  .open_term_image_delete {
 	display: inline-block;
 }
+
+svg,
+img[src*=".svg"] {
+	max-width: 150px !important;
+	max-height: 150px !important;
+}
