@@ -2,7 +2,7 @@
 Contributors: pixelgrade, vlad.olaru, babbardel
 Tags: category, taxonomy, term, icon, image
 Requires at least: 5.9.0
-Tested up to: 7.0
+Tested up to: 7.1
 Requires PHP: 7.4
 Stable tag: 1.0.4
 License: GPL-2.0-or-later
