@@ -4,7 +4,7 @@ Tags: category, taxonomy, term, icon, image
 Requires at least: 5.9.0
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.0.4
+Stable tag: 1.0.5
 License: GPL-2.0-or-later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -27,6 +27,9 @@ It is up to you to query and output in your theme using the provided getter func
 3. Now you can add or edit category, tags or any other taxonomy terms icons.
 
 == Changelog ==
+
+= 1.0.5 =
+* Declared compatibility with WordPress 7.1.
 
 = 1.0.4 =
 * Updated WordPress compatibility metadata for WordPress 7.0.
